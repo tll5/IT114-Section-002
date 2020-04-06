@@ -4,7 +4,7 @@ public class Payload implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -6625037986217386003L;
-	private String message;
+	public String message;
 	public void setMessage(String s) {
 		this.message = s;
 	}
@@ -46,9 +46,43 @@ public class Payload implements Serializable{
 	public int getTurns() {
 		return this.turns;
 	}
+	//WORKED ON AS OF 4/5/20
+	public int clientId;
+	public void setClientId(int ci) {
+		this.clientId = ci; //assume it's a reference to who send this to server
+	}
+	public int getClientId() {
+		return this.clientId;
+	}
+	
+	public int type;
+	public void setType(int typ) {
+		this.type = typ;
+	}
+	public int getType() {
+		return this.type;
+	}
+	
+	public int x;
+	public void setX(int valueX) {
+		this.x = valueX;
+	}
+	public int getX() {
+		return this.x;
+	}
+	
+	public int y;
+	public void setY(int valueY) {
+		this.x = valueY;
+	}
+	public int getY() {
+		return this.y;
+	}
+	public int player;
+	//public String message;
 	@Override
 	public String toString() {
 		return String.format("Type[%s], Message[%s], Turns[%s]",
-					getPayloadType().toString(), getMessage(), getTurns());
+					getPayloadType().toString(), getX(), getY(), getMessage(), getTurns());
 	}
 }

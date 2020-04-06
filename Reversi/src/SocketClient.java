@@ -3,80 +3,84 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 
 public class SocketClient {
 	Socket server;
+	GameClient gc; //remove?
+	public static boolean isConnected = false;
+	Queue<Payload> toServer = new LinkedList<Payload>();
+	Queue<Payload> fromServer = new LinkedList<Payload>();
+	public static boolean isRunning = false;
 	
-	public void connect(String address, int port) {
+	public void SetGameClient(GameClient gc) {
+		this.gc = gc;
+	}
+	
+	public void _connect(String address, int port) {
 		try {
 			server = new Socket(address, port);
 			System.out.println("Player connected");
+			isRunning = true;
+			isConnected = true;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public void setClientName(String name) {
+		//we should only really call this once
+		//we should have a name, let's tell our server
+		Payload p = new Payload();
+		//we can also default payloadtype in payload
+		//to a desired value, though it's good to be clear
+		//what we're sending
+		p.setPayloadType(PayloadType.CONNECT);
+		//p.setMessage(name);
+		
+		//p.setClientName(name);
+		
+		//out.writeObject(p);
+		toServer.add(p);
+	}
+	
 	public void start() throws IOException {
 		if(server == null) {
 			return;
 		}
 		System.out.println("Client Started");
+		isRunning = true;
 		//listen to console, server in, and write to server out
-		try(Scanner si = new Scanner(System.in);
-				ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
+		try(	ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(server.getInputStream());){
-			//let's block the thread for a sec to gather a username
-			String name ="";
-			do {
-				System.out.println("Please enter a username to play");
-				name = si.nextLine();
-				if(name == null || name.trim().length() == 0) {
-					name="";
-				}
-			}
-			while(!server.isClosed() && name != null && name.length() == 0);
-			//we should have a name, let's tell our server
-			Payload p = new Payload();
-			//we can also default payloadtype in payload
-			//to a desired value, though it's good to be clear
-			//what we're sending
-			p.setPayloadType(PayloadType.CONNECT);
-			p.setMessage(name);
-			out.writeObject(p);
-			
-			
 			//Thread to listen for keyboard input so main thread isn't blocked
 			Thread inputThread = new Thread() {
 				@Override
 				public void run() {
 					try {
-						while(!server.isClosed()) {
-							System.out.println("Waiting for input");
-							String line = si.nextLine();
-							if(!"quit".equalsIgnoreCase(line) && line != null) {
-								//grab line and throw it into a payload object
-								Payload p = new Payload();
-								//we can also default payloadtype in payload
-								//to a desired value, though it's good to be clear
-								//what we're sending
-								p.setPayloadType(PayloadType.MESSAGE);
-								p.setMessage(line);
+						while(isRunning && !server.isClosed()) {
+							//we're going to be taking payloads off the queue
+							//and feeding them to the server
+							Payload p = toServer.poll();
+							if(p != null) {
 								out.writeObject(p);
 							}
 							else {
-								System.out.println("Stopping input thread");
-								//we're quitting so tell server we disconnected so it can broadcast
-								Payload p = new Payload();
-								p.setPayloadType(PayloadType.DISCONNECT);
-								p.setMessage("bye");
-								out.writeObject(p);
-								break;
+								try {
+									Thread.sleep(8);
+								}
+								catch (Exception e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					}
 					catch(Exception e) {
+						e.printStackTrace();
 						System.out.println("Client shutdown");
 					}
 					finally {
@@ -91,11 +95,12 @@ public class SocketClient {
 				@Override
 				public void run() {
 					try {
-						Payload fromServer;
+						Payload p;
 						//while we're connected, listen for payloads from server
-						while(!server.isClosed() && (fromServer = (Payload)in.readObject()) != null) {
+						while(isRunning && !server.isClosed() && (p = (Payload)in.readObject()) != null) {
 							//System.out.println(fromServer);
-							processPayload(fromServer);
+							fromServer.add(p);
+							//processPayload(fromServer);
 						}
 						System.out.println("Stopping server listen thread");
 					}
@@ -113,15 +118,35 @@ public class SocketClient {
 					}
 				}
 			};
-			fromServerThread.start();//start the thread
-			
+			fromServerThread.start();
+	
+			Thread payloadProcessor = new Thread(){
+				@Override
+				public void run() {
+					while(isRunning) {
+						Payload p = fromServer.poll();
+						if(p != null) {
+							processPayload(p);
+						}
+						else {
+							try {
+								Thread.sleep(8);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			};
+			payloadProcessor.start();
 			//Keep main thread alive until the socket is closed
 			//initialize/do everything before this line
 			while(!server.isClosed()) {
 				Thread.sleep(50);
 			}
 			System.out.println("Exited loop");
-			System.exit(0);//force close
+			//System.exit(0);//force close
 			//TODO implement cleaner closure when server stops
 			//without this, it still waits for input before terminating
 		}
@@ -165,15 +190,42 @@ public class SocketClient {
 			}
 		}
 	}
+	public static SocketClient connect(String host, int port) {
+		SocketClient client = new SocketClient();
+		client._connect(host, port);
+		Thread clientThread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					client.start();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		clientThread.start();
+		try {
+			Thread.sleep(50);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return client;
+	}
 	public static void main(String[] args) {
 		SocketClient client = new SocketClient();
 		client.connect("127.0.0.1", 3002);
+		//System.out.println("Client is connected and started");
+		/*
 		try {
 			//if start is private, it's valid here since this main is part of the class
 			client.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		*/
+		client.setClientName("Test");
 	}
 
 }
