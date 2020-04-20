@@ -17,6 +17,19 @@ public class SocketServerSide {
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
 	//We'll use a queue and a thread to separate our chat history
 	Queue<String> messages = new LinkedList<String>();
+	
+	public GameState state = new GameState();
+	public synchronized void toggleButton(Payload payload) {
+		if(state.isButtonOn && !payload.IsOn()) {
+			state.isButtonOn = false;
+			broadcast(payload);
+		}
+		else if (!state.isButtonOn && payload.IsOn()) {
+			state.isButtonOn = true;
+			broadcast(payload);
+		}
+	}
+	
 	private void start(int port) {
 		this.port = port;
 		startQueueReader();
@@ -201,4 +214,10 @@ public class SocketServerSide {
 		server.start(port);
 		System.out.println("Server Stopped");
 	}
+}
+
+class GameState {
+	public static GameState GAME;
+	public static GameState LOBBY;
+	boolean isButtonOn = false;
 }

@@ -4,7 +4,16 @@ public class Payload implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -6625037986217386003L;
+	private boolean isOn = false;
 	public String message;
+	
+	public void IsOn(boolean isOn) {
+		this.isOn = isOn;
+	}
+	public boolean IsOn() {
+		return this.isOn;
+	}
+	
 	public void setMessage(String s) {
 		this.message = s;
 	}
@@ -83,6 +92,6 @@ public class Payload implements Serializable{
 	@Override
 	public String toString() {
 		return String.format("Type[%s], Message[%s], Turns[%s]",
-					getPayloadType().toString(), getX(), getY(), getMessage(), getTurns());
+					getPayloadType().toString(), IsOn()+"", getX(), getY(), getMessage(), getTurns());
 	}
 }

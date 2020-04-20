@@ -8,30 +8,34 @@ import java.util.Queue;
 import java.util.Scanner;
 
 public class SocketClient {
+	public static boolean isConnected;
 	Socket server;
-	GameClient gc; //remove?
-	public static boolean isConnected = false;
-	Queue<Payload> toServer = new LinkedList<Payload>();
-	Queue<Payload> fromServer = new LinkedList<Payload>();
-	public static boolean isRunning = false;
-	
+	//GameClient gc; //remove?
+	private OnReceiveMessage listener;
+	public void registerListener(OnReceiveMessage listener) {
+		this.listener = listener;
+	}
+	//public static boolean isConnected = false;
+	private Queue<Payload> toServer = new LinkedList<Payload>();
+	private Queue<Payload> fromServer = new LinkedList<Payload>();
+	//public static boolean isRunning = false;
+	/*
 	public void SetGameClient(GameClient gc) {
 		this.gc = gc;
 	}
-	
+	*/
+
 	public void _connect(String address, int port) {
 		try {
 			server = new Socket(address, port);
 			System.out.println("Player connected");
-			isRunning = true;
-			isConnected = true;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+/*
 	public void setClientName(String name) {
 		//we should only really call this once
 		//we should have a name, let's tell our server
@@ -47,13 +51,14 @@ public class SocketClient {
 		//out.writeObject(p);
 		toServer.add(p);
 	}
-	
+	*/
+
 	public void start() throws IOException {
 		if(server == null) {
 			return;
 		}
 		System.out.println("Client Started");
-		isRunning = true;
+		//isRunning = true;
 		//listen to console, server in, and write to server out
 		try(	ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(server.getInputStream());){
@@ -62,7 +67,7 @@ public class SocketClient {
 				@Override
 				public void run() {
 					try {
-						while(isRunning && !server.isClosed()) {
+						while( !server.isClosed()) {
 							//we're going to be taking payloads off the queue
 							//and feeding them to the server
 							Payload p = toServer.poll();
@@ -97,7 +102,7 @@ public class SocketClient {
 					try {
 						Payload p;
 						//while we're connected, listen for payloads from server
-						while(isRunning && !server.isClosed() && (p = (Payload)in.readObject()) != null) {
+						while(!server.isClosed() && (p = (Payload)in.readObject()) != null) {
 							//System.out.println(fromServer);
 							fromServer.add(p);
 							//processPayload(fromServer);
@@ -123,7 +128,7 @@ public class SocketClient {
 			Thread payloadProcessor = new Thread(){
 				@Override
 				public void run() {
-					while(isRunning) {
+					while(!server.isClosed()) {
 						Payload p = fromServer.poll();
 						if(p != null) {
 							processPayload(p);
@@ -157,6 +162,26 @@ public class SocketClient {
 			close();
 		}
 	}
+	
+	public void postConnectionData() {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.CONNECT);
+		//payload.IsOn(isOn);
+		toServer.add(payload);
+	}
+	public void doClick(boolean isOn) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.SWITCH);
+		payload.IsOn(isOn);
+		toServer.add(payload);
+	}
+	public void sendMessage(String message) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.MESSAGE);
+		payload.setMessage(message);
+		toServer.add(payload);
+	}
+	
 	private void processPayload(Payload payload) {
 		System.out.println(payload);
 		switch(payload.getPayloadType()) {
@@ -175,6 +200,15 @@ public class SocketClient {
 					String.format("%s", payload.getMessage())
 			);
 			break;
+		case STATE_SYNC:
+			System.out.println("Synching");
+			break;
+		case SWITCH:
+			System.out.println("Switching");
+			if (listener != null) {
+				listener.onReceived(payload.IsOn());
+			}
+			break;	
 		default:
 			System.out.println("Unhandled payload type: " + payload.getPayloadType().toString());
 			break;
@@ -217,15 +251,22 @@ public class SocketClient {
 		SocketClient client = new SocketClient();
 		client.connect("127.0.0.1", 3002);
 		//System.out.println("Client is connected and started");
-		/*
+		
 		try {
 			//if start is private, it's valid here since this main is part of the class
 			client.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		*/
-		client.setClientName("Test");
+		
 	}
 
+	public void setClientName(String clientName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
+interface OnReceiveMessage {
+	void onReceived(boolean isOn);
 }

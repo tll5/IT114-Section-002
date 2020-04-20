@@ -5,10 +5,18 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferStrategy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -43,6 +51,11 @@ public class GameClient extends JPanel{
 	static GameState gameState = GameState.LOBBY;
 	public static JFrame myFrame;
 	GameEngine ge;
+	static Dimension gameArea;
+	protected JPanel canvas;
+	public static Dimension getGameArea() {
+		return gameArea;
+	}
 	public GameClient() {
 		
 		
@@ -73,12 +86,14 @@ public class GameClient extends JPanel{
 				toggleComponent("game", true);
 				//toggleComponent("score", true);
 				//toggleComponent("scores", true);
+				this.canvas.setVisible(true);
 				break;
 			case LOBBY:
 				toggleComponent("lobby", true);
 				toggleComponent("game", false);
 				//toggleComponent("score", false);
 				//toggleComponent("scores", false);
+				this.canvas.setVisible(false);
 				break;
 			default:
 				break;
@@ -207,8 +222,4 @@ public class GameClient extends JPanel{
 		}
 	}*/
 	}
-}
-enum GameState{
-	LOBBY,
-	GAME
 }

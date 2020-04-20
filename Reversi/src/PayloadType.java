@@ -3,6 +3,8 @@ public enum PayloadType {
 	CONNECT,
 	DISCONNECT,
 	MESSAGE,
-	TURNS
+	TURNS,
+	STATE_SYNC,
+	SWITCH
 }
 
