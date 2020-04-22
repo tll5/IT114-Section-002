@@ -11,6 +11,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -84,8 +85,10 @@ public class ChatSwitch extends JFrame implements OnReceiveMessage{
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
 				System.out.println("Painting");
-				g.setColor(Color.black);
+				g.setColor(this.getBackground());
+				Dimension d = this.getSize();
 				g.fillRect(0, 0, 400, 200);
+				g.setColor(Color.black);
 			}
 		*/
 		toggle.setText("OFF");
@@ -143,9 +146,19 @@ public class ChatSwitch extends JFrame implements OnReceiveMessage{
 		    	}
 		    }
 		});
-		
+		JPanel container = new JPanel();
+		container.setLayout(new BorderLayout());
+		JTextArea ta = new JTextArea();
+		ta.setEditable(false);
+		container.add(ta, BorderLayout.CENTER);
+		JPanel spacer = new JPanel();
+		Dimension panelSize = new Dimension(100, 400);
+		container.setPreferredSize(panelSize);
+		spacer.setPreferredSize(panelSize);
 		area.add(toggle, BorderLayout.CENTER);
 		area.add(click, BorderLayout.SOUTH);
+		area.add(container, BorderLayout.WEST);
+		area.add(spacer, BorderLayout.EAST);
 		
 		window.setPreferredSize(new Dimension(400,600));
 		window.pack();

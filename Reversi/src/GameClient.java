@@ -48,7 +48,7 @@ public class GameClient extends JPanel{
 	UIUtils ui = new UIUtils();
 	
 	static HashMap<String, Component> components = new HashMap<String, Component>();
-	static GameState gameState = GameState.LOBBY;
+	GameState gameState = new GameState();
 	public static JFrame myFrame;
 	GameEngine ge;
 	static Dimension gameArea;
@@ -80,7 +80,7 @@ public class GameClient extends JPanel{
 	 * @param frame
 	 */
 	void ChangePanels() {
-		switch(GameClient.gameState) {
+		switch(GameState.currentClientState) {
 			case GAME:
 				toggleComponent("lobby", false);
 				toggleComponent("game", true);
@@ -196,7 +196,7 @@ public class GameClient extends JPanel{
 		
 	}
 	void StartGameLoop(String host, int port, String playername) {
-		GameClient.gameState = GameState.GAME;
+		GameState.currentClientState = ClientState.GAME;
     	ChangePanels();
         toggleRunningState(true);
 		//gc.run();

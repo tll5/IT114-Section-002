@@ -24,6 +24,10 @@ public class ServerThread extends Thread{
 		//so we won't see that we connected. Jump down to run()
 		//broadcastConnected();
 	}
+	public void setClientId(long id) {
+		clientName += "_" + id;
+	}
+	
 	
 	void syncStateToMyClient() {
 		System.out.println(this.clientName + " broadcast state");
@@ -61,6 +65,12 @@ public class ServerThread extends Thread{
 	void addTurns() {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.TURNS);
+		server.broadcast(payload, this.clientName);
+	}
+	
+	void addTileClick() {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.TILE_CHECK);
 		server.broadcast(payload, this.clientName);
 	}
 	
@@ -131,6 +141,9 @@ public class ServerThread extends Thread{
 			payload.setMessage(WordBlackList.filter(payload.getMessage()));
 			server.broadcast(payload, this.clientName);
 			break;
+		case TILE_CHECK:
+			 server.broadcast(payload, this.clientName);
+			 System.out.println(this.clientName + "cannot move until your opponent's turn is over.");
 		case SWITCH:
 			server.toggleButton(payload);
 			break;

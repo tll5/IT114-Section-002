@@ -169,18 +169,27 @@ public class SocketClient {
 		//payload.IsOn(isOn);
 		toServer.add(payload);
 	}
+	
 	public void doClick(boolean isOn) {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.SWITCH);
 		payload.IsOn(isOn);
 		toServer.add(payload);
 	}
+	//Tile Check for the turns to commence and function properly
+	public void doTileCheck(boolean yn ) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.TILE_CHECK);
+		toServer.add(payload);
+	}
+
 	public void sendMessage(String message) {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.MESSAGE);
 		payload.setMessage(message);
 		toServer.add(payload);
 	}
+	
 	
 	private void processPayload(Payload payload) {
 		System.out.println(payload);
@@ -198,6 +207,11 @@ public class SocketClient {
 		case MESSAGE:
 			System.out.println(
 					String.format("%s", payload.getMessage())
+			);
+			break;
+		case TILE_CHECK:
+			System.out.println(
+					String.format("Player \"%s\" cannot act during the opponent's turn", payload.getMessage())
 			);
 			break;
 		case STATE_SYNC:

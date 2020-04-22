@@ -48,6 +48,14 @@ public class Payload implements Serializable{
 		return this.number;
 	}
 	*/
+	private int tile_check;
+	public void setTileCheck(int tc) {
+		this.tile_check = tc;
+	}
+	public int getTileCheck() {
+		return this.tile_check;
+	}
+	
 	private int turns;
 	public void setTurns(int t) {
 		this.turns = t;
@@ -92,6 +100,6 @@ public class Payload implements Serializable{
 	@Override
 	public String toString() {
 		return String.format("Type[%s], Message[%s], Turns[%s]",
-					getPayloadType().toString(), IsOn()+"", getX(), getY(), getMessage(), getTurns());
+					getPayloadType().toString(), IsOn()+"", getX(), getY(), getMessage(), getTileCheck(), getTurns());
 	}
 }

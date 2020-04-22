@@ -19,6 +19,11 @@ public class SocketServerSide {
 	Queue<String> messages = new LinkedList<String>();
 	
 	public GameState state = new GameState();
+	public static long ClientID = 0;
+	public synchronized long getNextId() {
+		ClientID++;
+		return ClientID;
+	}
 	public synchronized void toggleButton(Payload payload) {
 		if(state.isButtonOn && !payload.IsOn()) {
 			state.isButtonOn = false;
@@ -45,6 +50,7 @@ public class SocketServerSide {
 					//Server thread is the server's representation of the client
 					ServerThread thread = new ServerThread(client, this);
 					thread.start();
+					
 					//add client thread to list of clients
 					clients.add(thread);
 					System.out.println("Player added to players pool");
@@ -217,7 +223,10 @@ public class SocketServerSide {
 }
 
 class GameState {
-	public static GameState GAME;
-	public static GameState LOBBY;
+	public static ClientState currentClientState;
 	boolean isButtonOn = false;
+}
+enum ClientState {
+	LOBBY,
+	GAME
 }
