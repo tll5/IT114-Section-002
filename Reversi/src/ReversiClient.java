@@ -5,6 +5,8 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.Graphics2D;
 import java.util.HashMap;
 
@@ -20,19 +22,74 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-public class ReversiClient {
+public class ReversiClient extends JFrame implements OnReceive {
 	public static Point testPoint = new Point(0,0);
 	public static HashMap<Point, JButton> lazyGrid;
+	static SocketClient client;
+	static JTextArea txtArea;
+	public ReversiClient (String title) {
+		super(title);
+	}
 	public static void main(String[] args) {
 		
 		UIUtils ui = new UIUtils();
 		
-		JFrame frame = new JFrame("Reversi: Remastered");
+		ReversiClient frame = new ReversiClient ("Reversi: Remastered");
 		frame.setLayout(new BorderLayout());
 		frame.setSize(new Dimension(800,800));
 		//frame.setMinimumSize(new Dimension(600,600));
 		//empty panel we'll use as a spacer for now
 		JPanel empty = new JPanel();
+		
+		
+		JPanel connectionDetails = new JPanel();
+		JTextField host = new JTextField();
+		host.setText("127.0.0.1");
+		JTextField port = new JTextField();
+		port.setText("3001");
+		JButton connect = new JButton();
+		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// add a window listener
+		frame.addWindowListener(new WindowAdapter() {
+			/* (non-Javadoc)
+			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
+			 */
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// before we stop the JVM stop the example
+				//client.isRunning = false;
+				super.windowClosing(e);
+			}
+		});
+		
+		connect.setText("Connect");
+		connectionDetails.add(host);
+		connectionDetails.add(port);
+		connectionDetails.add(connect);
+		frame.add(connectionDetails, BorderLayout.NORTH);
+		
+		connect.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		    	int _port = -1;
+		    	try {
+		    		_port = Integer.parseInt(port.getText());
+		    	}
+		    	catch(Exception num) {
+		    		System.out.println("Port not a number");
+		    	}
+		    	if(_port > -1) {
+			    	client = SocketClient.connect(host.getText(), _port);
+			    	client.registerListener(frame);
+			    	//TODO Decide whether to show Client Name upon connection 
+			    	client.postConnectionData();
+			    	connect.setEnabled(false);
+			    	connectionDetails.setVisible(false);
+
+		    	}
+		    }
+		});
 		
 		int rows = 8;
 		int cols = 8;
@@ -48,7 +105,7 @@ public class ReversiClient {
 		grid2.setLayout(new GridLayout(rows, cols));
 		grid2.setPreferredSize(gridDimensions);
 		//grid2.setMaximumSize(gridDimensions);
-		JTextField textField = new JTextField();
+		//JTextField textField = new JTextField();
 		//grid layout creation (full layout control)
 		for(int i = 0; i < (rows*cols); i++) {
 			JButton button = new JButton();
@@ -68,7 +125,7 @@ public class ReversiClient {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					textField.setText(((JButton)e.getSource()).getText());
+					//textField.setText(((JButton)e.getSource()).getText());
 					
 					//give focus back to grid2 for navigation sample
 					grid2.grabFocus();
@@ -107,7 +164,7 @@ public class ReversiClient {
 					public void actionPerformed(ActionEvent e) {
 						//set the textfield value to the text value of the button to show clicked coordinate
 						
-						textField.setText(((JButton)e.getSource()).getText());
+						//textField.setText(((JButton)e.getSource()).getText());
 						//set clicked button to red
 						JButton me = ((JButton)e.getSource());
 						
@@ -134,13 +191,50 @@ public class ReversiClient {
 			}
 		}
 		//add grid1 sample to left
-		frame.add(grid1, BorderLayout.WEST);
+		//frame.add(grid1, BorderLayout.WEST);
 		//add empty space to prevent the grids from visually merging initially
-		frame.add(empty, BorderLayout.CENTER);
+		//TODO Adding ChatIntegration 
+		JTextArea textArea = new JTextArea();
+		//don't let the user edit this directly
+		textArea.setEditable(false);
+		textArea.setText("");
+		txtArea = textArea;
+		JPanel chatArea = new JPanel();
+		chatArea.setLayout(new BorderLayout());
+		//add text area to chat area
+		chatArea.add(textArea, BorderLayout.CENTER);
+		chatArea.setBorder(BorderFactory.createLineBorder(Color.black));
+		JPanel userInput = new JPanel();
+		JTextField textField = new JTextField();
+		textField.setPreferredSize(new Dimension(100,30));
+		//setup submit button
+		JButton b = new JButton();
+		b.setPreferredSize(new Dimension(100,30));
+		b.setText("Send");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String message = textField.getText();
+				if(message.length() > 0) {
+					//append a newline and the text from the textfield
+					//to that textarea (simulate simple chatroom)
+					client.sendMessage(message);
+					textField.setText("");
+				}
+			}
+			
+		});
+		//add textfield and button to panel
+		userInput.add(textField);
+		userInput.add(b);
+		chatArea.add(userInput, BorderLayout.SOUTH);
+		
+		frame.add(chatArea, BorderLayout.CENTER);
 		//add grid2 sample to right
-		frame.add(grid2, BorderLayout.EAST);
+		frame.add(grid2, BorderLayout.WEST);
 		//add output field to bottom
-		frame.add(textField, BorderLayout.SOUTH);
+		//frame.add(textField, BorderLayout.SOUTH);
 		//resize based on elements applied to layout
 		frame.pack();
 		frame.setVisible(true);
@@ -179,6 +273,26 @@ public class ReversiClient {
 		am.put("DAU", new MoveAction(false, 0, 1));
 		am.put("LAU", new MoveAction(false, -1,0));
 		am.put("RAU", new MoveAction(false, 1, 0));
+	}
+
+	@Override
+	public void onReceived(boolean isOn) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReceivedMessage(String msg) {
+		// TODO Auto-generated method stub
+		if(txtArea != null) {
+            txtArea.append(msg);
+            txtArea.append(System.lineSeparator());
+        }
+	}
+	@Override
+	public void onReceivedTilePlacement(int clientId, int x, int y) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 //Create a move action we can trigger on key press

@@ -11,15 +11,18 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.text.DefaultCaret;
 
-public class ChatSwitch extends JFrame implements OnReceiveMessage{
+public class ChatSwitch extends JFrame implements OnReceive{
 	static SocketClient client;
 	static JButton toggle;
 	static JButton clickit;
+	static JTextArea history;
 	public ChatSwitch() {
 		super("Reversi SocketClient");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -91,6 +94,7 @@ public class ChatSwitch extends JFrame implements OnReceiveMessage{
 				g.setColor(Color.black);
 			}
 		*/
+		toggle.setBackground(Color.RED);
 		toggle.setText("OFF");
 		//Cache it statically (not great but it's a sample)
 		ChatSwitch.toggle = toggle;
@@ -150,7 +154,18 @@ public class ChatSwitch extends JFrame implements OnReceiveMessage{
 		container.setLayout(new BorderLayout());
 		JTextArea ta = new JTextArea();
 		ta.setEditable(false);
-		container.add(ta, BorderLayout.CENTER);
+		history = ta;
+		history.setWrapStyleWord(true);
+		history.setAutoscrolls(true);
+		history.setLineWrap(true);
+		JScrollPane scroll = new JScrollPane(history);
+		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		DefaultCaret caret = (DefaultCaret)history.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		container.add(scroll, BorderLayout.CENTER);
+		
+		
 		JPanel spacer = new JPanel();
 		Dimension panelSize = new Dimension(100, 400);
 		container.setPreferredSize(panelSize);
@@ -170,5 +185,19 @@ public class ChatSwitch extends JFrame implements OnReceiveMessage{
 		if(ChatSwitch.toggle != null) {
 			ChatSwitch.toggleButton(isOn);
 		}
+	}
+	@Override
+	public void onReceivedMessage(String msg) {
+		// TODO Auto-generated method stub
+		if(history != null) {
+			history.append(msg);
+			history.append(System.lineSeparator());
+		}
+		
+	}
+	@Override
+	public void onReceivedTilePlacement(int clientId, int x, int y) {
+		// TODO Auto-generated method stub
+		
 	}
 }

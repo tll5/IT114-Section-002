@@ -99,7 +99,7 @@ public class Payload implements Serializable{
 	//public String message;
 	@Override
 	public String toString() {
-		return String.format("Type[%s], Message[%s], Turns[%s]",
-					getPayloadType().toString(), IsOn()+"", getX(), getY(), getMessage(), getTileCheck(), getTurns());
+		return String.format("Type[%s], Message[%s], TileCheck[%s], Turns[%s]",
+					getPayloadType().toString(), getMessage(), getTileCheck(), getTurns());
 	}
 }

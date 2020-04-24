@@ -132,6 +132,7 @@ public class ServerThread extends Thread{
 				this.clientName = m;
 			}
 			broadcastConnected();
+			syncStateToMyClient();
 			break;
 		case DISCONNECT:
 			System.out.println("Received disconnect");

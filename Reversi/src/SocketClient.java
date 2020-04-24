@@ -11,8 +11,8 @@ public class SocketClient {
 	public static boolean isConnected;
 	Socket server;
 	//GameClient gc; //remove?
-	private OnReceiveMessage listener;
-	public void registerListener(OnReceiveMessage listener) {
+	private OnReceive listener;
+	public void registerListener(OnReceive listener) {
 		this.listener = listener;
 	}
 	//public static boolean isConnected = false;
@@ -151,6 +151,7 @@ public class SocketClient {
 				Thread.sleep(50);
 			}
 			System.out.println("Exited loop");
+			
 			//System.exit(0);//force close
 			//TODO implement cleaner closure when server stops
 			//without this, it still waits for input before terminating
@@ -166,6 +167,7 @@ public class SocketClient {
 	public void postConnectionData() {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.CONNECT);
+		//payload.setMessage(clientName);
 		//payload.IsOn(isOn);
 		toServer.add(payload);
 	}
@@ -193,21 +195,29 @@ public class SocketClient {
 	
 	private void processPayload(Payload payload) {
 		System.out.println(payload);
+		String msg = "";
 		switch(payload.getPayloadType()) {
 		case CONNECT:
-			System.out.println(
-					String.format("Player \"%s\" connected", payload.getMessage())
-			);
+			msg = String.format("Player \"%s\" connected", payload.getMessage());
+			System.out.println(msg);
+			if(listener != null) {
+				listener.onReceivedMessage(msg);
+			}
 			break;
 		case DISCONNECT:
-			System.out.println(
-					String.format("Player \"%s\" disconnected", payload.getMessage())
-			);
+			msg = String.format("Player \"%s\" connected", payload.getMessage());
+			System.out.println(msg);
+			if(listener != null) {
+				listener.onReceivedMessage(msg);
+			}
 			break;
 		case MESSAGE:
 			System.out.println(
 					String.format("%s", payload.getMessage())
 			);
+			if(listener != null) {
+				listener.onReceivedMessage(payload.getMessage());
+			}
 			break;
 		case TILE_CHECK:
 			System.out.println(
@@ -221,7 +231,17 @@ public class SocketClient {
 			System.out.println("Switching");
 			if (listener != null) {
 				listener.onReceived(payload.IsOn());
+				listener.onReceivedMessage(
+						String.format("%s turned the button %s", 
+								payload.getMessage(),
+								payload.IsOn()?"On":"Off")
+				);
 			}
+			/*
+			if (listener != null) {
+				listener.onReceived(payload.IsOn());
+			}
+			*/
 			break;	
 		default:
 			System.out.println("Unhandled payload type: " + payload.getPayloadType().toString());
@@ -261,19 +281,6 @@ public class SocketClient {
 		}
 		return client;
 	}
-	public static void main(String[] args) {
-		SocketClient client = new SocketClient();
-		client.connect("127.0.0.1", 3002);
-		//System.out.println("Client is connected and started");
-		
-		try {
-			//if start is private, it's valid here since this main is part of the class
-			client.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
 
 	public void setClientName(String clientName) {
 		// TODO Auto-generated method stub
@@ -281,6 +288,8 @@ public class SocketClient {
 	}
 
 }
-interface OnReceiveMessage {
+interface OnReceive {
 	void onReceived(boolean isOn);
+	void onReceivedMessage(String msg);
+	void onReceivedTilePlacement(int clientId, int x, int y);
 }

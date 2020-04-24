@@ -39,8 +39,9 @@ public class SocketServerSide {
 		this.port = port;
 		startQueueReader();
 		//sample score save, why not here?
-		loadScore();
-		saveScore(1000);
+		//loadScore();
+		//saveScore(1000);
+		
 		System.out.println("Waiting for opponent");
 		try (ServerSocket serverSocket = new ServerSocket(port);) {
 			while(SocketServerSide.isRunning) {
@@ -50,7 +51,7 @@ public class SocketServerSide {
 					//Server thread is the server's representation of the client
 					ServerThread thread = new ServerThread(client, this);
 					thread.start();
-					
+					thread.setClientId(getNextId());
 					//add client thread to list of clients
 					clients.add(thread);
 					System.out.println("Player added to players pool");
@@ -204,7 +205,7 @@ public class SocketServerSide {
 		//let's allow port to be passed as a command line arg
 		//in eclipse you can set this via "Run Configurations" 
 		//	-> "Arguments" -> type the port in the text box -> Apply
-		int port = 3002;//make some default
+		int port = 3001;//make some default
 		if(args.length >= 1) {
 			String arg = args[0];
 			try {

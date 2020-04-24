@@ -12,6 +12,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class ChatIntegration {
+	static SocketClient client;
+	static JTextArea txtArea;
 	public static void main(String[] args) {
 		//create frame
 		JFrame frame = new JFrame("Reversi Chat Integration"); //'Simple Chat Mockup'
@@ -25,6 +27,7 @@ public class ChatIntegration {
 		//don't let the user edit this directly
 		textArea.setEditable(false);
 		textArea.setText("");
+		txtArea = textArea;
 		//create panel to hold multiple controls
 		JPanel chatArea = new JPanel();
 		chatArea.setLayout(new BorderLayout());
@@ -50,8 +53,7 @@ public class ChatIntegration {
 				if(message.length() > 0) {
 					//append a newline and the text from the textfield
 					//to that textarea (simulate simple chatroom)
-					textArea.append("\n" + textField.getText());
-					textField.setText("");
+					client.sendMessage(message);
 				}
 			}
 			
