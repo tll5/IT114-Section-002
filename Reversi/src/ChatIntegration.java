@@ -15,33 +15,33 @@ public class ChatIntegration {
 	static SocketClient client;
 	static JTextArea txtArea;
 	public static void main(String[] args) {
-		//create frame
+
 		JFrame frame = new JFrame("Reversi Chat Integration"); //'Simple Chat Mockup'
 		frame.setLayout(new BorderLayout());
-		//create panel
+
 		JPanel simpleChat = new JPanel();
 		simpleChat.setPreferredSize(new Dimension(400,400));
 		simpleChat.setLayout(new BorderLayout());
-		//create text area for messages
+
 		JTextArea textArea = new JTextArea();
-		//don't let the user edit this directly
+
 		textArea.setEditable(false);
 		textArea.setText("");
 		txtArea = textArea;
-		//create panel to hold multiple controls
+
 		JPanel chatArea = new JPanel();
 		chatArea.setLayout(new BorderLayout());
-		//add text area to chat area
+
 		chatArea.add(textArea, BorderLayout.CENTER);
 		chatArea.setBorder(BorderFactory.createLineBorder(Color.black));
-		//add chat area to panel
+
 		simpleChat.add(chatArea, BorderLayout.CENTER);
-		//create panel to hold multiple controls
+
 		JPanel userInput = new JPanel();
-		//setup textfield
+
 		JTextField textField = new JTextField();
 		textField.setPreferredSize(new Dimension(100,30));
-		//setup submit button
+
 		JButton b = new JButton();
 		b.setPreferredSize(new Dimension(100,30));
 		b.setText("Send");
@@ -51,8 +51,6 @@ public class ChatIntegration {
 			public void actionPerformed(ActionEvent e) {
 				String message = textField.getText();
 				if(message.length() > 0) {
-					//append a newline and the text from the textfield
-					//to that textarea (simulate simple chatroom)
 					client.sendMessage(message);
 				}
 			}
@@ -61,7 +59,6 @@ public class ChatIntegration {
 		//add textfield and button to panel
 		userInput.add(textField);
 		userInput.add(b);
-		//add panel to simpleChat panel
 		simpleChat.add(userInput, BorderLayout.SOUTH);
 		//add simpleChat panel to frame
 		frame.add(simpleChat, BorderLayout.CENTER);

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.*;
 
 import com.google.gson.Gson;
 
@@ -73,6 +74,37 @@ public class SocketServerSide {
 			}
 		}
 	}
+	/*
+	void init() {
+		int[][] boardInit = new int[8][8];
+		boardInit[4][4] = new Cell();
+		boardInit[4][5] = new Cell();
+		boardInit[5][4] = new Cell();
+		boardInit[5][5] = new Cell();
+		boards.add(boardInit);
+	}
+	List<int[][]> boards = new ArrayList<int[][]>();
+	void pickBoard() {
+		Random rand = new Random();
+		int[][] presetGrid = boards.get(rand.nextInt(boards.size()));
+		Grid grid = new Grid(8,8);
+		syncReversi(grid);
+	}
+	public synchronized void syncReversi(Grid grid) {
+		for(int col = 0; col < grid.getSize().width; col++) {
+			for(int row = 0; row < grid.getSize().height; row++) {
+				Cell cell = grid.getCell(col, row);
+				Point p = cell.getCoord();
+				int player = cell.getPlayerID();
+				Payload payload = new Payload();
+				payload.setPayloadType(PayloadType.STATE_SYNC);
+				payload.setCoord(p);
+				payload.setPlayerId(player);
+				broadcast(payload);
+			}
+		}
+	}
+	*/
 	void loadScore() {
 		try {
 			Gson gson = new Gson();

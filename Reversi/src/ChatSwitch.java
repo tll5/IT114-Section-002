@@ -200,4 +200,9 @@ public class ChatSwitch extends JFrame implements OnReceive{
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void onReceiveConnection(String name, boolean isConnected) {
+		// TODO Auto-generated method stub
+		
+	}
 }

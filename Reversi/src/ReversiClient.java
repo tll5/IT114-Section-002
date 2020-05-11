@@ -8,7 +8,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -120,8 +122,7 @@ public class ReversiClient extends JFrame implements OnReceive {
 			button.setText(buttonText);
 			
 			button.setBackground(Color.green);
-			//create an action to perform when button is clicked
-			//override the default actionPerformed method to tell the code how to handle it
+
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -292,6 +293,34 @@ public class ReversiClient extends JFrame implements OnReceive {
 	@Override
 	public void onReceivedTilePlacement(int clientId, int x, int y) {
 		// TODO Auto-generated method stub
+		
+	}
+	/*
+	@Override
+	public void onReceiveUpdateCell(int playId, Point coord) {
+		// TODO Auto-generated method stub
+		if(ReversiClient.lazyGrid != null) {
+			grid.setColor(playerId, coord.x, coord.y, color, true);
+			grid.setSelection(playerId, coord.x, coord.y, true);
+		}
+	}
+	*/
+	List<String> users = new ArrayList<String>();
+	JTextArea userArea = new JTextArea();
+	@Override
+	public void onReceiveConnection(String name, boolean isConnected) {
+		// TODO Auto-generated method stub
+		if(isConnected) {
+			users.add(name);
+		}
+		else {
+			users.remove(name);
+		}
+		userArea.setText("");
+		for(int i = 0; i < users.size(); i++) {
+			userArea.append(users.get(i));
+			userArea.append(System.lineSeparator());
+		}
 		
 	}
 }

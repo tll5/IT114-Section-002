@@ -226,6 +226,11 @@ public class SocketClient {
 			break;
 		case STATE_SYNC:
 			System.out.println("Synching");
+			/*
+			if(onReceiveListener != null) {
+				onReceiveListener.onReceiveUpdateCell(payload.getPlayerId(), payload.getCoord());
+			}
+			*/
 			break;
 		case SWITCH:
 			System.out.println("Switching");
@@ -291,5 +296,7 @@ public class SocketClient {
 interface OnReceive {
 	void onReceived(boolean isOn);
 	void onReceivedMessage(String msg);
+	void onReceiveConnection(String name, boolean isConnected);
 	void onReceivedTilePlacement(int clientId, int x, int y);
+	//void onReceiveUpdateCell(int playId, Point coord);
 }

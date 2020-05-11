@@ -10,7 +10,7 @@ public class ServerThread extends Thread{
 	private boolean isRunning = false;
 	private SocketServerSide server;//ref to our server so we can call methods on it
 	//more easily
-	private String clientName = "Anon";
+	private String clientName = "User";
 	public ServerThread(Socket myClient, SocketServerSide server) throws IOException {
 		this.client = myClient;
 		this.server = server;

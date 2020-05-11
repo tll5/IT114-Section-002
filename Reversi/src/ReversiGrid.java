@@ -36,6 +36,7 @@ class Cell{
 	public void reset() {
 		player = -1;
 	}
+
 }
 /***
  * Holds our multi-dimensional array Cell
@@ -58,6 +59,9 @@ class Grid{
 	public Cell getCell(Point p) {
 		return getCell(p.x, p.y);
 	}
+	public String getPlayerID(String clientName) {
+		return clientName;
+	}
 	public void updateCell(int x, int y, String something) {
 		//TODO do something with cell via param(s)
 		try {
@@ -78,6 +82,25 @@ class Grid{
 			}
 		}
 	}
+	/*
+	public boolean setSelection(int playerId, int x, int y, boolean allowOverwrite) {
+		try {
+			Cell c = grid[x][y];
+			if(!allowOverwrite) {
+				if(c.getPlayerID() != playerId) {
+					return false;
+				}
+			}
+			c.setPlayerID(playerId);
+		}
+		catch(Exception e) {
+			System.out.println("Likely coordinates are out of bounds");
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	*/
 }
 
 class Client{
