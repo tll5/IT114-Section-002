@@ -26,15 +26,10 @@ public class ChatSwitch extends JFrame implements OnReceive{
 	public ChatSwitch() {
 		super("Reversi SocketClient");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// add a window listener
+
 		this.addWindowListener(new WindowAdapter() {
-			/* (non-Javadoc)
-			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
-			 */
 			@Override
 			public void windowClosing(WindowEvent e) {
-				// before we stop the JVM stop the example
-				//client.isRunning = false;
 				super.windowClosing(e);
 			}
 		});
@@ -96,7 +91,6 @@ public class ChatSwitch extends JFrame implements OnReceive{
 		*/
 		toggle.setBackground(Color.RED);
 		toggle.setText("OFF");
-		//Cache it statically (not great but it's a sample)
 		ChatSwitch.toggle = toggle;
 		ChatIcon icon = new ChatIcon(Color.GREEN,400,200, 2);
 		icon.setText("This is a test");
@@ -131,19 +125,7 @@ public class ChatSwitch extends JFrame implements OnReceive{
 		    	}
 		    	if(_port > -1) {
 			    	client = SocketClient.connect(host.getText(), _port);
-			    	
-			    	//METHOD 1 Using the interface
 			    	client.registerListener(window);
-			    	//METHOD 2 Lamba Expression (unnamed function to handle callback)
-			    	/*client.registerListener(()->{	
-			    		if(UISample.toggle != null) {
-			    			UISample.toggle.setText("OFF");
-			    			UISample.toggle.setBackground(Color.RED);
-			    		}
-			    	});*/
-			    	
-			    	
-			    	//trigger any one-time data after client connects
 			    	client.postConnectionData();
 			    	connect.setEnabled(false);
 			    	click.setEnabled(true);

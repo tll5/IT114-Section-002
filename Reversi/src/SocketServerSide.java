@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -105,6 +106,23 @@ public class SocketServerSide {
 		}
 	}
 	*/
+	/*
+	public synchronized void setColor(ServerThread caller, Payload p) {
+		boolean allowOverwrite = true;
+		boolean success = Grid.setColor(
+				p.getPlayerId(),
+				p.getCoord().x,
+				p.getCoord().y,
+				//p.getColor(), 
+				allowOverwrite);
+		if(success) {
+			broadcast(p);
+		}
+		else {
+			caller.send("Either the coord is out of bounds or you're not allowed to overwrite another player");
+		}
+	}
+	*/
 	void loadScore() {
 		try {
 			Gson gson = new Gson();
@@ -125,13 +143,8 @@ public class SocketServerSide {
 		ss.scores.add(new Score("Opponent", 0));
 		System.out.println(ss.toString());
 		try(FileWriter writer = new FileWriter("score.json",false)){
-			//TODO get ScoreState to convert to JSON Object
-			//JSONObject not needed in this case, just showing proof of concept
-			//if you need to override toString to build your own JSON
 			Gson gson = new Gson();
 			writer.write(gson.toJson(ss));
-			//JSONObject jo = (JSONObject)new JSONParser().parse(ss.toString());
-			//writer.write(jo.toJSONString());
 			writer.flush();
 		}
 		catch(Exception e) {
@@ -153,8 +166,6 @@ public class SocketServerSide {
 							write.write(System.lineSeparator());
 							write.flush();
 						}
-						//sleep for a bit to let OS multi-task
-						//since it's FIFO we don't need immediate polling
 						sleep(50);
 					}
 				}
@@ -178,9 +189,7 @@ public class SocketServerSide {
 	public synchronized void broadcast(Payload payload, String name) {
 		String msg = payload.getMessage();
 		payload.setMessage(
-				//prepending client name to front of message
 				(name!=null?name:"[Name Error]") 
-				//including original message if not null (with a prepended colon)
 				+ (msg != null?": "+ msg:"")
 		);
 		broadcast(payload);
@@ -194,33 +203,21 @@ public class SocketServerSide {
 			ServerThread client = iter.next();
 			boolean messageSent = client.send(payload);
 			if(!messageSent) {
-				//if we got false, due to update of send()
-				//we can assume the client lost connection
-				//so let's clean it up
 				iter.remove();
 				System.out.println("Removed player " + client.getId());
 			}
 		}
 	}
-	//Broadcast given payload to everyone connected
 	public synchronized void broadcast(Payload payload, long id) {
-		//let's temporarily use the index as the client identifier to
-		//show in all client's chat. You'll see why this is a bad idea
-		//when clients disconnect/reconnect.
 		int from = getClientIndexByThreadId(id);
 		String msg = payload.getMessage();
 		payload.setMessage(
-				//prepending client name to front of message
 				(from>-1?"Client[" + from+"]":"unknown") 
-				//including original message if not null (with a prepended colon)
 				+ (msg != null?": "+ msg:"")
 		);
-		//end temp identifier (maybe this won't be too temporary as I've reused
-		//it in a few samples now)
 		broadcast(payload);
 		
 	}
-	//Broadcast given message to everyone connected
 	public synchronized void broadcast(String message, long id) {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.MESSAGE);
@@ -228,23 +225,17 @@ public class SocketServerSide {
 		broadcast(payload, id);
 	}
 	void storeInFile(String message) {
-		//add our message to our queue
 		messages.add(message);
-		//we'll have a separate thread do the actual saving for now
 	}
 
 	public static void main(String[] args) {
-		//let's allow port to be passed as a command line arg
-		//in eclipse you can set this via "Run Configurations" 
-		//	-> "Arguments" -> type the port in the text box -> Apply
-		int port = 3001;//make some default
+		int port = 3001;
 		if(args.length >= 1) {
 			String arg = args[0];
 			try {
 				port = Integer.parseInt(arg);
 			}
 			catch(Exception e) {
-				//ignore this, we know it was a parsing issue
 			}
 		}
 		System.out.println("Starting Server");

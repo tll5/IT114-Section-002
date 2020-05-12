@@ -1,4 +1,13 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Point;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.swing.JButton;
 
 /**
  * Starting point of the application to group up all the classes
@@ -18,7 +27,47 @@ public class ReversiGrid {
  *
  */
 
-class Cell{
+class Cell extends JButton{
+	private static final long serialVersionUID = 1L;
+	private int cellID = -1;
+	private Point coord;
+	private int playerID = -1;
+	private Dimension sizeCache;
+	public Cell() {
+		super();
+	}
+	public Cell(int id, Point coord) {
+		super();
+		cellID = id;
+		this.coord = coord;
+		this.setBackground(Color.white);
+	}
+	
+	public int getCellID() {
+		return cellID;
+	}
+	public void setCellID(int cellID) {
+		this.cellID = cellID;
+	}
+	
+	
+	public int getPlayerID() {
+		return playerID;
+	}
+	public void setPlayerID(int playerID) {
+		this.playerID = playerID;
+	}
+	
+	public Point getCoord() {
+		return coord;
+	}
+	@Override
+	public void paintComponent(Graphics g) {
+		g.setColor(this.getBackground());
+		//grab the current dimensions
+		sizeCache = this.getSize();
+	    g.fillRect(0, 0, sizeCache.width, sizeCache.height);
+	}
 	public int player = -1;//-1 is untouched
 	//We can add a point or x,y to have a local ref of our coordinate
 	public Point mySpot = new Point(0,0);//init later
@@ -36,26 +85,79 @@ class Cell{
 	public void reset() {
 		player = -1;
 	}
+	
 
 }
-/***
- * Holds our multi-dimensional array Cell
- * @author MattT
- *
- */
 class Grid{
 	Cell[][] grid;
+	Dimension size;
 	public Grid(int cols, int rows) {
 		grid = new Cell[cols][rows];
+		size = new Dimension(cols, rows);
 		for(int x = 0; x < cols; x++) {
 			for (int y = 0; y < rows; y++) {
 				grid[x][y] = new Cell(new Point(x,y));
 			}
 		}
+		initGrid();
 	}
+	private void initGrid() {
+		int i = 0;
+		for(int row = 0; row < size.width; row++) {
+			for(int col = 0; col < size.height; col++) {
+				grid[row][col] = new Cell(i, new Point(row, col));
+				i++;
+			}
+		}
+	}
+	void init() {
+		Cell[][] boardInit = new Cell[8][8];
+		boardInit[4][4] = new Cell();
+		boardInit[4][5] = new Cell();
+		boardInit[5][4] = new Cell();
+		boardInit[5][5] = new Cell();
+		boards.add(boardInit);
+	}
+	List<Cell[][]> boards = new ArrayList<Cell[][]>();
+	void pickBoard() {
+		Random rand = new Random();
+		Cell[][] presetGrid = boards.get(rand.nextInt(boards.size()));
+		Grid grid = new Grid(8,8);
+		syncReversi(grid);
+	}
+	public synchronized void syncReversi(Grid grid) {
+		for(int col = 0; col < grid.getSize().width; col++) {
+			for(int row = 0; row < grid.getSize().height; row++) {
+				Cell cell = grid.getCell(col, row);
+				Point p = cell.getCoord();
+				int player = cell.getPlayerID();
+				Payload payload = new Payload();
+				payload.setPayloadType(PayloadType.STATE_SYNC);
+				payload.setCoord(p);
+				payload.setPlayerId(player);
+				broadcast(payload);
+			}
+		}
+	}
+	private void broadcast(Payload payload) {
+		// TODO Auto-generated method stub
+		broadcast(payload);
+	}
+	public Dimension getSize() {
+		return size;
+	}
+	public void draw() {
+		for(int row = 0; row < size.width; row++) {
+			for(int col = 0; col < size.height; col++) {
+				grid[row][col].repaint();
+			}
+		}
+	}
+	/*
 	public Cell getCell(int x, int y) {
 		return grid[x][y];
 	}
+	*/
 	public Cell getCell(Point p) {
 		return getCell(p.x, p.y);
 	}
@@ -82,7 +184,7 @@ class Grid{
 			}
 		}
 	}
-	/*
+	
 	public boolean setSelection(int playerId, int x, int y, boolean allowOverwrite) {
 		try {
 			Cell c = grid[x][y];
@@ -100,13 +202,32 @@ class Grid{
 		}
 		return true;
 	}
-	*/
+	public boolean setColor(int playerId, int x, int y, Color color, boolean allowOverwrite) {
+		try {
+			Cell c = grid[x][y];
+			if(!allowOverwrite) {
+				if(c.getPlayerID() != playerId) {
+					return false;
+				}
+			}
+			c.setBackground(color);
+			c.setPlayerID(playerId);
+		}
+		catch(Exception e) {
+			System.out.println("Likely coordinates are out of bounds");
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	public Cell getCell(int x, int y) {
+		return grid[x][y];
+	}
 }
 
 class Client{
 	Grid grid;
 	public Client() {
-		//must match server
 		grid = new Grid(8,8);
 	}
 	public void processPayload(Payload p) {
@@ -130,6 +251,7 @@ class Server{
 	}
 	public void processPayload(Payload p) {
 		//from client
+		
 		if(p.type == 1 /*pick spot*/) {
 			Cell cell = grid.getCell(p.x, p.y);
 			if(cell.player < 0) {
@@ -138,29 +260,9 @@ class Server{
 				broadcast(p);
 			}
 			else {
-				//Someone is here
-				//can drop request or send a failure reply
-				//back to only the player who made the request
 				p.message = "Spot's taken, sorry";
 				reply(p.clientId, p);
 			}
 		}
 	}
 }
-/***
- * Very crude/generic Payload class (not recommended to use since it's not
- * as clear as the one outlined in class)
- * @author MattT
- *
- */
-/*
-class Payload {
-	//maybe not needed, but just here for example
-	public int clientId;//assume it's a reference to who send this to server
-	public int type;
-	public int x;
-	public int y;
-	public int player;
-	public String message;
-}
-*/

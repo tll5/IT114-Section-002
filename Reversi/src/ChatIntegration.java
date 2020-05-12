@@ -16,7 +16,7 @@ public class ChatIntegration {
 	static JTextArea txtArea;
 	public static void main(String[] args) {
 
-		JFrame frame = new JFrame("Reversi Chat Integration"); //'Simple Chat Mockup'
+		JFrame frame = new JFrame("Reversi Chat Integration");
 		frame.setLayout(new BorderLayout());
 
 		JPanel simpleChat = new JPanel();
@@ -56,11 +56,11 @@ public class ChatIntegration {
 			}
 			
 		});
-		//add textfield and button to panel
+
 		userInput.add(textField);
 		userInput.add(b);
 		simpleChat.add(userInput, BorderLayout.SOUTH);
-		//add simpleChat panel to frame
+
 		frame.add(simpleChat, BorderLayout.CENTER);
 		
 		frame.pack();

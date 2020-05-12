@@ -10,12 +10,10 @@ import java.util.Scanner;
 public class SocketClient {
 	public static boolean isConnected;
 	Socket server;
-	//GameClient gc; //remove?
 	private OnReceive listener;
 	public void registerListener(OnReceive listener) {
 		this.listener = listener;
 	}
-	//public static boolean isConnected = false;
 	private Queue<Payload> toServer = new LinkedList<Payload>();
 	private Queue<Payload> fromServer = new LinkedList<Payload>();
 	//public static boolean isRunning = false;
@@ -35,41 +33,26 @@ public class SocketClient {
 			e.printStackTrace();
 		}
 	}
-/*
+
 	public void setClientName(String name) {
-		//we should only really call this once
-		//we should have a name, let's tell our server
 		Payload p = new Payload();
-		//we can also default payloadtype in payload
-		//to a desired value, though it's good to be clear
-		//what we're sending
 		p.setPayloadType(PayloadType.CONNECT);
-		//p.setMessage(name);
-		
-		//p.setClientName(name);
-		
-		//out.writeObject(p);
 		toServer.add(p);
 	}
-	*/
+	
 
 	public void start() throws IOException {
 		if(server == null) {
 			return;
 		}
 		System.out.println("Client Started");
-		//isRunning = true;
-		//listen to console, server in, and write to server out
 		try(	ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(server.getInputStream());){
-			//Thread to listen for keyboard input so main thread isn't blocked
 			Thread inputThread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						while( !server.isClosed()) {
-							//we're going to be taking payloads off the queue
-							//and feeding them to the server
 							Payload p = toServer.poll();
 							if(p != null) {
 								out.writeObject(p);
@@ -93,19 +76,15 @@ public class SocketClient {
 					}
 				}
 			};
-			inputThread.start();//start the thread
+			inputThread.start();
 			
-			//Thread to listen for responses from server so it doesn't block main thread
 			Thread fromServerThread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						Payload p;
-						//while we're connected, listen for payloads from server
 						while(!server.isClosed() && (p = (Payload)in.readObject()) != null) {
-							//System.out.println(fromServer);
 							fromServer.add(p);
-							//processPayload(fromServer);
 						}
 						System.out.println("Stopping server listen thread");
 					}
@@ -145,16 +124,10 @@ public class SocketClient {
 				}
 			};
 			payloadProcessor.start();
-			//Keep main thread alive until the socket is closed
-			//initialize/do everything before this line
 			while(!server.isClosed()) {
 				Thread.sleep(50);
 			}
 			System.out.println("Exited loop");
-			
-			//System.exit(0);//force close
-			//TODO implement cleaner closure when server stops
-			//without this, it still waits for input before terminating
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -167,8 +140,6 @@ public class SocketClient {
 	public void postConnectionData() {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.CONNECT);
-		//payload.setMessage(clientName);
-		//payload.IsOn(isOn);
 		toServer.add(payload);
 	}
 	
@@ -178,7 +149,6 @@ public class SocketClient {
 		payload.IsOn(isOn);
 		toServer.add(payload);
 	}
-	//Tile Check for the turns to commence and function properly
 	public void doTileCheck(boolean yn ) {
 		Payload payload = new Payload();
 		payload.setPayloadType(PayloadType.TILE_CHECK);
@@ -286,12 +256,12 @@ public class SocketClient {
 		}
 		return client;
 	}
-
+	/*
 	public void setClientName(String clientName) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	*/
 }
 interface OnReceive {
 	void onReceived(boolean isOn);

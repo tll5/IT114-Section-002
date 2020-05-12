@@ -43,7 +43,6 @@ public class GameClient extends JPanel{
 	private static final long serialVersionUID = 6748325367132904432L;
 	
 	public static boolean isRunning = true;
-	//Player player = new Player();
 	
 	UIUtils ui = new UIUtils();
 	
@@ -63,22 +62,12 @@ public class GameClient extends JPanel{
 	public void toggleRunningState(boolean s) {
 		isRunning = s;
 	}
-	/***
-	 * Looks up a component by name and changes visibility based on the toggle boolean value
-	 * @param name
-	 * Name of component key
-	 * @param toggle
-	 * Boolean for isVisible
-	 */
+
 	void toggleComponent(String name, boolean toggle) {
 		if(components.containsKey(name)) {
 			components.get(name).setVisible(toggle);
 		}
 	}
-	/***
-	 * Based on Client State we'll hide/show groups of components
-	 * @param frame
-	 */
 	void ChangePanels() {
 		switch(GameState.currentClientState) {
 			case GAME:
@@ -102,11 +91,6 @@ public class GameClient extends JPanel{
         myFrame.revalidate();
         myFrame.repaint();
 	}
-	/***
-	 * Safely gets a UI element from components hashmap
-	 * @param name
-	 * @return null if key not exists
-	 */
 	public Component GetUIElement(String name) {
 		if(components.containsKey(name)) {
 			return components.get(name);
@@ -122,8 +106,7 @@ public class GameClient extends JPanel{
 		} catch (UnsupportedLookAndFeelException ex) {
 		}
 		JFrame frame = new JFrame("Reversi: Remastered");
-		
-		//Terminates program when we click the x (close) button)
+
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
 		frame.setSize(new Dimension(800,800));
@@ -139,12 +122,9 @@ public class GameClient extends JPanel{
 		
 	}
 	public static GameClient InitGameCanvas() {
-		//Game area
 		JPanel playArea = new GameClient();
-		//set the local reference of myFrame for easier use
 		components.put("game", playArea);
 		playArea.setPreferredSize(new Dimension(800,800));
-		//playArea.getBounds()
 		
 		myFrame.add(playArea, BorderLayout.CENTER);
 		return (GameClient)playArea;
@@ -166,9 +146,6 @@ public class GameClient extends JPanel{
 		connectButton.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
-		        //your actions
-		    	//host.getText().trim(), 
-				//port.getText().trim()
 		    	GameClient gc = (GameClient)components.get("game");
 		    	if(gc != null) {
 		    		gc.StartGameLoop(
@@ -191,7 +168,6 @@ public class GameClient extends JPanel{
 		lobby.add(message);
 		
 		components.put("lobby.message", message);
-		//myFrame.add(scores, BorderLayout.NORTH);
 		myFrame.add(lobby, BorderLayout.NORTH);
 		
 	}
@@ -199,7 +175,6 @@ public class GameClient extends JPanel{
 		GameState.currentClientState = ClientState.GAME;
     	ChangePanels();
         toggleRunningState(true);
-		//gc.run();
         ge = new GameEngine();
         ge.connect(host,port, playername);
         ge.SetUI(this);
@@ -213,13 +188,5 @@ public class GameClient extends JPanel{
 	}
 	
 	public void run() {
-	/*while(GameEngine.isRunning) {
-		try {
-			Thread.sleep(16);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
 	}
 }

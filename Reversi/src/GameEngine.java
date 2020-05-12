@@ -2,8 +2,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-//import Player;
-//import SocketClient;
 
 public class GameEngine extends _GameEngine{
 	
@@ -35,41 +33,12 @@ public class GameEngine extends _GameEngine{
 			players.add(p);
 			System.out.println("Added player " + i);
 		}
-		/*
-		Random random = new Random();
-		//give a random direction
-		//based on 0 or 1
-		for(int i = 0; i < players.size(); i++) {
-			Player player = players.get(i);
-			player.direction.x = random.nextInt(2) == 0?-1:1;
-			player.direction.y = random.nextInt(2) == 0?-1:1;
-			
-			//give a random speed between 1 and 3
-			player.speed.x = random.nextInt(3)+1;
-			player.speed.y = random.nextInt(3)+1;
-			System.out.println("Set player defaults " + i);
-		}
-		*/
 	}
 
 	@Override
 	protected void Update() {
 		
 	}
-		// TODO Auto-generated method stub
-		/*
-		if(ui == null) {
-			return;
-		}
-		for(int i = 0; i < players.size(); i++) {
-			Player player = players.get(i);
-			player.move(ui.getBounds());
-			if(SocketClient.isConnected && player.changedDirection) {
-				client.SyncDirection(player.getLastDirection());
-			}
-		}
-	}
-	*/
 
 	@Override
 	protected void End() {
@@ -83,7 +52,6 @@ public class GameEngine extends _GameEngine{
 		if(ui == null) {
 			return;
 		}
-		//ui.draw();
 	}
 
 }

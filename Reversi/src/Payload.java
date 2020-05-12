@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.io.Serializable;
 public class Payload implements Serializable{
 	/**
@@ -20,7 +21,7 @@ public class Payload implements Serializable{
 	public String getMessage() {
 		return this.message;
 	}
-	/*
+	
 	private String clientName;
 	public void setClientName(String clientN)
 	{
@@ -30,7 +31,7 @@ public class Payload implements Serializable{
 	{
 		return this.getClientName();
 	}
-	*/
+
 	
 	private PayloadType payloadType;
 	public void setPayloadType(PayloadType pt) {
@@ -101,5 +102,20 @@ public class Payload implements Serializable{
 	public String toString() {
 		return String.format("Type[%s], Message[%s], TileCheck[%s], Turns[%s]",
 					getPayloadType().toString(), getMessage(), getTileCheck(), getTurns());
+	}
+	public Point coord;
+	public Object getCoord() {
+		return this.coord;
+	}
+	public void setCoord(Point p) {
+		this.coord = p;
+	}
+	public int playerId;
+	public void setPlayerId(int player2) {
+		this.playerId = player2;
+	}
+	public int getPlayerId() {
+		// TODO Auto-generated method stub
+		return playerId;
 	}
 }
